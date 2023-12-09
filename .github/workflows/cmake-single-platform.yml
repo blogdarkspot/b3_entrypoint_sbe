@@ -44,6 +44,6 @@ jobs:
       if: always()
       with:
        files: |
-         ./**/results_junit.xml
+         ./**/result_junit.xml
             
 
