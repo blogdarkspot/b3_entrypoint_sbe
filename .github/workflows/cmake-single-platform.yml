@@ -44,8 +44,6 @@ jobs:
       if: always()
       with:
        files: |
-         ./**/*.xml
-         test-results/**/*.trx
-         test-results/**/*.json 
+         ./**/results_junit.xml
             
 
