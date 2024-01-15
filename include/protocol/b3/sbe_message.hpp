@@ -101,6 +101,11 @@ struct csbe_message {
 
   const sbe_message_body &cbody() { return _M_mb; }
 
+  std::uint16_t type() const
+  {
+    return _M_mh.templateId();
+  } 
+
 private:
   char *_M_buffer;
   std::size_t _M_offset;

@@ -21,13 +21,18 @@ namespace io
             {
               //  sanitizer();
             }
-            posix_memalign((void**)&_M_alligned_buffer, 512, 512 * 4);
+            auto ret = posix_memalign((void**)&_M_alligned_buffer, BLOCK_SIZE, BUFFER_SIZE);
+            if(ret != 0)
+            {
+                throw std::bad_alloc();
+            }
             wopen();
         }
 
         ~message_log_write()
         {
             close(_M_fd);
+            free(_M_alligned_buffer);
         }
 
         void write (const char* __buffer, std::size_t __length)
@@ -38,7 +43,7 @@ namespace io
         void write(char *__buffer, std::size_t __length)
         {
             memcpy(_M_alligned_buffer, __buffer, __length);
-            auto totWrite = ::write(_M_fd, _M_alligned_buffer, 2048);
+            auto totWrite = ::write(_M_fd, _M_alligned_buffer, BUFFER_SIZE);
             if(totWrite == -1)
             {
                 throw std::ios_base::failure(std::vformat(MSG_ERROR_TO_WRITE, std::make_format_args(_M_path.c_str())));
@@ -54,7 +59,8 @@ namespace io
         constexpr static const auto MSG_ERROR_OPEN_FILE = "Cannot Open file: {} {}";
         constexpr static const auto MSG_ERROR_TO_WRITE = "Error to Write in file: {}";
         constexpr static const auto MSG_ERROR_TO_WRITE_MISSING_BYTES = "Missing write bytes: total expected {} total write {}";
-        constexpr static const auto BLOCK_SIZE = 2048;
+        constexpr static const auto BLOCK_SIZE = 512;
+        constexpr static const auto BUFFER_SIZE = BLOCK_SIZE * 4;
         /**
          * The file structure is  std::size_t | buffer msg | std::size_t,
          * so the sanitizer check the last message where the header is aways equals to tail
